@@ -64,6 +64,7 @@ class TransferService(
             }
         }
     }
+
     // TODO this can go now, right? because these are runtimes?
     @Throws(InsufficientFundsException::class, AccountNotFoundException::class)
     @PreAuthorize("isAuthenticated()")
@@ -82,10 +83,10 @@ class TransferService(
             "User ${userService.loggedInUser} does not have access to account $debitAccountID"
         }
 
-        if ((debitAccount.balance?.minus(amount)
-                ?: findBalance(debitAccount.accountID)) < debitAccount.minimumBalance
-        ) {
-            throw InsufficientFundsException("Insufficient funds for transferring $amount from account ${debitAccount.accountID} with balance $debitAccount.balance")
+        val debitAccountBalance: Long = debitAccount.balance ?: findBalance(debitAccount.accountID)
+
+        if (debitAccountBalance - amount < debitAccount.minimumBalance) {
+            throw InsufficientFundsException("Insufficient funds for transferring $amount from account ${debitAccount.accountID} with balance $debitAccountBalance")
         }
 
         // Update the balance of the debit account.

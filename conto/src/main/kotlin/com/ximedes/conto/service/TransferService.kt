@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.lang.IllegalStateException
 import javax.security.auth.login.AccountNotFoundException
 
-const val SIGNUP_BONUS = 100L;
+const val SIGNUP_BONUS = 100L
 
 @Service
 @Transactional
@@ -82,9 +82,10 @@ class TransferService(
             "User ${userService.loggedInUser} does not have access to account $debitAccountID"
         }
 
-        val currentBalance = findBalance(debitAccount.accountID)
-        if (currentBalance - amount < debitAccount.minimumBalance) {
-            throw InsufficientFundsException("Insufficient funds for transferring $amount from account ${debitAccount.accountID} with balance $currentBalance")
+        if ((debitAccount.balance?.minus(amount)
+                ?: findBalance(debitAccount.accountID)) < debitAccount.minimumBalance
+        ) {
+            throw InsufficientFundsException("Insufficient funds for transferring $amount from account ${debitAccount.accountID} with balance $debitAccount.balance")
         }
 
         return Transfer(debitAccount.accountID, creditAccount.accountID, amount, description).also {

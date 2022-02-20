@@ -31,7 +31,7 @@ class AccountBuilder {
     var minimumBalance = 0L
     var balance: Long? = null
 
-    private fun build() = Account(accountID, owner, description, minimumBalance)
+    private fun build() = Account(accountID, owner, description, minimumBalance, balance)
 
     companion object {
         private var ACCOUNT_ID = 1L

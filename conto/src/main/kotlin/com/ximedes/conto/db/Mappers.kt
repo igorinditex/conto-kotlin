@@ -29,6 +29,8 @@ interface UserMapper {
 interface AccountMapper {
     fun insertAccount(account: Account)
     fun updateAccount(account: Account)
+    fun setAccountBalance(@Param("accountId") accountId: String, @Param("balance") balance: Long)
+    fun updateAccountBalanceWhenTransfer(@Param("accountId") accountId: String, @Param("amount") amount: Long)
     fun find(criteria: AccountCriteria): List<Account>
     fun getNextUniqueID(): Long
 }

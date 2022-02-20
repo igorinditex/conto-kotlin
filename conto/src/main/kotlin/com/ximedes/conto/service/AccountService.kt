@@ -39,6 +39,10 @@ class AccountService(private val accountMapper: AccountMapper,
 
     fun findAllAccounts(): List<Account> = accountMapper.find(AccountCriteria())
 
+    fun setAccountBalance(accountId: String, balance: Long) = accountMapper.setAccountBalance(accountId, balance)
+
+    fun updateAccountBalanceWhenTransfer(accountId: String, amount: Long) = accountMapper.updateAccountBalanceWhenTransfer(accountId, amount)
+
     @PreAuthorize("hasRole('ROLE_USER')")
     fun createAccount(description: String): Account {
         val username = userService.loggedInUser!!.username

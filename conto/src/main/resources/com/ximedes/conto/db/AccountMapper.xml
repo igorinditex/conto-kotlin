@@ -45,4 +45,18 @@
         WHERE account_id = #{accountID}
     </update>
 
+    <update id="setAccountBalance">
+        UPDATE account
+        SET balance = #{balance}
+        WHERE account_id = #{accountId}
+    </update>
+
+    <update id="updateAccountBalanceWhenTransfer" parameterType="map">
+        UPDATE account
+        SET balance = (SELECT balance + #{amount}
+        FROM account AS b
+        WHERE b.ACCOUNT_ID = #{accountId})
+        WHERE account_id = #{accountId}
+    </update>
+
 </mapper>

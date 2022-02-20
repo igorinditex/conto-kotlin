@@ -32,17 +32,20 @@ class TransferService(
             "User ${userService.loggedInUser} does not have access to account $accountID"
         }
 
-        val transfers = transferMapper.findTransfersByAccountID(accountID)
-        return transfers.sumByLong { t ->
-            if (t.creditAccountID == t.debitAccountID) {
-                // Corner case
-                0L
-            } else when (accountID) {
-                t.creditAccountID -> t.amount
-                t.debitAccountID -> -t.amount
-                else -> throw IllegalStateException("Transfer $t should be be in list of transfer for account $accountID")
-            }
+        val accountBalance: Long
+        // Check if the account balance is present in the DB
+        if (account.balance != null) {
+            accountBalance = account.balance
+        } else {
+            // If the balance is not present in the DB, the value has to be calculated.
+            accountBalance = calculateBalanceThroughTransfersHistory(accountID)
+            // Set the balance in the DB
+            accountService.setAccountBalance(
+                account.accountID,
+                accountBalance
+            )
         }
+        return accountBalance
     }
 
     fun calculateBalanceThroughTransfersHistory(

@@ -45,6 +45,22 @@ class TransferService(
         }
     }
 
+    fun calculateBalanceThroughTransfersHistory(
+        accountID: String
+    ): Long {
+        val transfers = transferMapper.findTransfersByAccountID(accountID)
+
+        return transfers.sumByLong { t ->
+            if (t.creditAccountID == t.debitAccountID) {
+                // Corner case
+                0L
+            } else when (accountID) {
+                t.creditAccountID -> t.amount
+                t.debitAccountID -> -t.amount
+                else -> throw IllegalStateException("Transfer $t should be be in list of transfer for account $accountID")
+            }
+        }
+    }
     // TODO this can go now, right? because these are runtimes?
     @Throws(InsufficientFundsException::class, AccountNotFoundException::class)
     @PreAuthorize("isAuthenticated()")

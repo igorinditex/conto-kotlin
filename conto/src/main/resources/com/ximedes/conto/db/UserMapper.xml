@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ximedes.conto.db.UserMapper">
+
+    <resultMap id="userMap" type="com.ximedes.conto.domain.User">
+        <constructor>
+            <idArg column="username" javaType="string"/>
+            <arg column="password" javaType="string"/>
+            <arg column="role" javaType="com.ximedes.conto.domain.Role"/>
+        </constructor>
+    </resultMap>
+
+    <select id="findByUsername" resultMap="userMap">
+        SELECT * FROM user WHERE username = #{username}
+    </select>
+
+    <insert id="insertUser" parameterType="com.ximedes.conto.domain.User">
+        INSERT INTO user
+        (username, canonical_username, role, password)
+        VALUES
+        (#{user.username}, #{canonicalUsername}, #{user.role}, #{user.password})
+    </insert>
+
+    <select id="isCommonPassword" resultType="boolean">
+      SELECT EXISTS(
+        SELECT 1 FROM common_passwords WHERE password = #{password}
+      )
+    </select>
+
+</mapper>

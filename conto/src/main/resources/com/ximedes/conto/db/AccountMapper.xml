@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ximedes.conto.db.AccountMapper">
+
+    <resultMap id="accountMap" type="com.ximedes.conto.domain.Account">
+        <constructor>
+            <idArg column="account_id" javaType="string"/>
+            <arg column="owner" javaType="string"/>
+            <arg column="description" javaType="string"/>
+            <arg column="minimum_balance" javaType="_long"/>
+        </constructor>
+    </resultMap>
+
+    <select id="getNextUniqueID" resultType="long">
+        SELECT NEXT VALUE FOR seq_acc_id
+    </select>
+
+    <select id="find" parameterType="com.ximedes.conto.domain.AccountCriteria" resultMap="accountMap">
+        select * from account
+        <where>
+            <if test="ownerID != null">
+                owner = #{ownerID}
+            </if>
+            <if test="accountID != null">
+                AND account_id = #{accountID}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertAccount" useGeneratedKeys="true" keyProperty="accountID">
+        INSERT INTO account
+        (account_id, owner, description, minimum_balance)
+        VALUES
+        (#{accountID}, #{owner}, #{description}, #{minimumBalance})
+    </insert>
+
+    <update id="updateAccount">
+        UPDATE account
+        SET description = #{description},
+        owner = #{owner},
+        minimum_balance = #{minimumBalance}
+        WHERE account_id = #{accountID}
+    </update>
+
+</mapper>

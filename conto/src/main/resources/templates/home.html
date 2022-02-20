@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns="http://www.w3.org/1999/xhtml"
+      th:replace="fragments/basepage :: html(~{::content})">
+
+<div th:fragment="content" id="div-page-home">
+    <div id="div-account-list" class="row">
+        <div class="col-lg-10">
+            <div class="panel panel-primary">
+                <div class="panel-heading"><h2 class="panel-title">My accounts</h2></div>
+                <div class="panel-body">
+                    <table class="table table-condensed" id="account-table">
+                        <thead>
+                        <tr>
+                            <th>Account number</th>
+                            <th>Description</th>
+                            <th style="text-align: right">Minimum balance</th>
+                            <th style="text-align: right">Balance</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="acc : ${accountList}">
+                            <td>
+                                <div class="radio">
+                                    <label th:inline="text">
+                                        <!-- NB An onclick handler for this input is set in `init-home.js`
+                                             loaded at the bottom of this page -->
+                                        <input type="radio" name="optionsRadios" id="optionsRadios1"
+                                               th:value="${acc.accountID}"
+                                               th:checked="${acc.accountID == selectedAccountID}">
+                                        [[${acc.accountID}]]
+                                    </label>
+                                </div>
+
+                            </td>
+                            <td th:text="${acc.description}" style="vertical-align: middle;">123</td>
+                            <td style="text-align: right;  vertical-align: middle;"
+                                th:text="${#numbers.formatInteger(acc.minimumBalance, 1, 'POINT')}">
+                                123
+                            </td>
+                            <td th:id="'th-balance-id-' + ${acc.accountID}"
+                                th:style="'text-align: right; vertical-align: middle;'"
+                                th:text="${#numbers.formatInteger(balances[acc.accountID], 1, 'POINT')}">
+                                123
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="panel-footer">
+                    <div class="btn-toolbar">
+                        <a id="a-create-transfer" th:href="@{/transfer}" class="btn btn-primary pull-right"><span
+                                class="glyphicon glyphicon-transfer"></span> Transfer funds</a>
+                        <a id="a-create-account" th:href="@{/account}" class="btn btn-primary pull-right">
+                            <span class="glyphicon glyphicon-plus"></span> Create account
+                        </a>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="div-transfer-list" class="row">
+        <div class="col-lg-10">
+            <div class="panel panel-primary">
+                <div class="panel-heading"><h2 class="panel-title" th:inline="text">Transfers for account
+                    '[[${selectedAccountID}]]'</h2></div>
+                <div class="panel-body">
+                    <table class="table table-condensed table-striped table-bordered" id="transfer-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>From / To</th>
+                            <th>Account</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="tx : ${transferList}">
+                            <td th:text="${tx.transferID}"></td>
+
+
+                            <div th:switch="${selectedAccountID}">
+                                <td th:case="${tx.creditAccountID}"
+                                    th:text="${allAccounts[tx.debitAccountID].owner}"></td>
+                                <td th:case="${tx.debitAccountID}"
+                                    th:text="${allAccounts[tx.creditAccountID].owner}"></td>
+                            </div>
+
+                            <div th:switch="${selectedAccountID}">
+                                <td th:case="${tx.creditAccountID}" th:text="${tx.debitAccountID}"></td>
+                                <td th:case="${tx.debitAccountID}" th:text="${tx.creditAccountID}"></td>
+                            </div>
+
+                            <td th:text="${tx.description}"></td>
+
+                            <div th:switch="${selectedAccountID}">
+                                <td th:case="${tx.creditAccountID}" style="text-align: right; color: green;"
+                                    th:text="'+' + ${#numbers.formatInteger(tx.amount, 1, 'POINT')}"></td>
+                                <td th:case="${tx.debitAccountID}" style="text-align: right;"
+                                    th:text="'-'+${#numbers.formatInteger(tx.amount, 1, 'POINT')}"></td>
+                            </div>
+
+                        </tr>
+                        </tbody>
+                    </table>
+                    <script src='/public/js/init-home.js'></script>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

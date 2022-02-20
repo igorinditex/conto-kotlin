@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ximedes.conto.db.TransferMapper">
+
+    <resultMap id="transferMap" type="com.ximedes.conto.domain.Transfer">
+        <constructor>
+            <idArg column="transfer_id" javaType="_long"/>
+            <arg column="debit_account_id" javaType="string"/>
+            <arg column="credit_account_id" javaType="string"/>
+            <arg column="amount" javaType="_long"/>
+            <arg column="description" javaType="string"/>
+        </constructor>
+    </resultMap>
+
+    <insert id="insertTransfer" useGeneratedKeys="true" keyProperty="transferID">
+        INSERT INTO transfer
+        (debit_account_id, credit_account_id, amount, description)
+        VALUES
+        (#{debitAccountID}, #{creditAccountID}, #{amount}, #{description})
+    </insert>
+
+    <select id="findByTransferID" resultMap="transferMap">
+        SELECT *
+        FROM transfer
+        WHERE transfer_id = #{transferID}
+    </select>
+
+    <select id="findTransfersByAccountID" resultMap="transferMap">
+        SELECT *
+        FROM transfer t
+        WHERE t.debit_account_id = #{id}
+              OR
+              t.credit_account_id = #{id}
+    </select>
+
+
+</mapper>

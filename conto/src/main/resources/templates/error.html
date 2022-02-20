@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns="http://www.w3.org/1999/xhtml"
+      th:replace="fragments/basepage :: html(~{::content})">
+
+
+<div th:fragment="content">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-2">
+            <div class="login-panel panel panel-danger">
+                <div class="panel-heading">
+                    <h3 class="panel-title">An error has occurred</h3>
+                </div>
+                <div class="panel-body">
+                    <p>An unexpected error has occurred, from which the application can not recover.</p>
+                    <a class="btn btn-lg btn-block" th:href="@{/}">Back</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</html>

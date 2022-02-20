@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="fragments/basepage :: html(~{::content})">
+
+<div th:fragment="content" id="div-create-account-page">
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="panel panel-primary">
+                <div class="panel-heading"><h2 class="panel-title">Create new account</h2></div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <form role="form" class="form-horizontal" th:object="${createAccountForm}" th:action="@{/account}"
+                          method="post">
+                        <div id="div-create-account-errors" th:errors="*" class="alert alert-danger"/>
+
+                        <div sec:authorize="hasRole('ROLE_ADMIN')" class="form-group" th:classappend="${#fields.hasErrors('*{ownerID}')} ? 'has-error'">
+                            <label for="input-owner" class="col-sm-4 control-label">Owner:</label>
+                            <div class="col-sm-4">
+                                <input id="input-owner" class="form-control" type="text" placeholder="Owner..."
+                                       th:field="*{ownerID}" autofocus>
+                            </div>
+                        </div>
+
+                        <div class="form-group" th:classappend="${#fields.hasErrors('*{description}')} ? 'has-error'">
+                            <label for="input-description" class="col-sm-4 control-label">Description:</label>
+                            <div class="col-sm-6">
+                                <input id="input-description" class="form-control" type="text" placeholder="Description..."
+                                       th:field="*{description}" autofocus>
+                            </div>
+                        </div>
+
+                        <div sec:authorize="hasRole('ROLE_ADMIN')" class="form-group" th:classappend="${#fields.hasErrors('*{minimumBalance}')} ? 'has-error'">
+                            <label for="input-minimumBalance" class="col-sm-4 control-label">Minmum balance:</label>
+                            <div class="col-sm-2">
+                                <input id="input-minimumBalance" class="form-control" type="text" value="0"
+                                       th:field="*{minimumBalance}">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"></label>
+                            <div class="col-sm-8">
+                                <div class="btn-toolbar">
+                                    <button id="submit-create-account-form" class="btn btn-primary pull-right"
+                                            type="submit">Submit
+                                    </button>
+                                    <a th:href="@{/}" class="btn btn-default pull-right" type="submit">Cancel</a>
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

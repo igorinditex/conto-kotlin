@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="fragments/basepage :: html(~{::content})">
+
+<div th:fragment="content" id="div-transfer-page">
+    <div th:replace="fragments/find-account-modal (callback=${'selectAccount'})"></div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="panel panel-primary">
+                <div class="panel-heading"><h2 class="panel-title">Transfer funds</h2></div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <form role="form" class="form-horizontal" th:object="${transferForm}" th:action="@{/transfer}"
+                          method="post">
+                        <div id="div-transfer-errors" th:errors="*" class="alert alert-danger"/>
+
+                        <div sec:authorize="hasRole('ROLE_USER')" class="form-group"
+                             th:classappend="${#fields.hasErrors('*{fromAccountID}')} ? 'has-error'">
+                            <label for="select-from-account" class="col-sm-2 control-label">From:</label>
+                            <div class="col-sm-10">
+                                <select id="select-from-account" class="form-control" th:field="*{fromAccountID}">
+                                    <option th:each="acc : ${userAccounts}"
+                                            th:value="${acc.accountID}"
+                                            th:text="${acc.description + ' (' + acc.accountID + ')'}"/>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div sec:authorize="hasRole('ROLE_ADMIN')" class="form-group"
+                             th:classappend="${#fields.hasErrors('*{fromAccountID}')} ? 'has-error'">
+                            <label for="input-from-account" class="col-sm-2 control-label">From:</label>
+                            <div class="col-sm-10">
+                                <div class="input-group">
+                                    <input id="input-from-account" class="form-control" type="text"
+                                           placeholder="From..."
+                                           th:field="*{fromAccountID}">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default" type="button" data-toggle="modal"
+                                                data-target="#div-find-account-modal"
+                                                data-input="input-from-account"><span class="glyphicon glyphicon-search"
+                                                                                      aria-hidden="true"></span></button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" th:classappend="${#fields.hasErrors('*{toAccountID}')} ? 'has-error'">
+                            <label for="input-to-account" class="col-sm-2 control-label">To:</label>
+                            <div class="col-sm-10">
+                                <div class="input-group">
+                                    <input id="input-to-account" class="form-control" type="text" placeholder="To..."
+                                           th:field="*{toAccountID}">
+                                    <span class="input-group-btn">
+                                        <button id="button-find-account" class="btn btn-default" type="button"
+                                                data-toggle="modal"
+                                                data-target="#div-find-account-modal"
+                                                data-input="input-to-account"><span class="glyphicon glyphicon-search"
+                                                                                    aria-hidden="true"></span></button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" th:classappend="${#fields.hasErrors('*{description}')} ? 'has-error'">
+                            <label for="input-description" class="col-sm-2 control-label">Description:</label>
+                            <div class="col-sm-10">
+                                <input id="input-description" class="form-control" type="text"
+                                       placeholder="Description..."
+                                       th:field="*{description}">
+                            </div>
+                        </div>
+
+
+                        <div class="form-group" th:classappend="${#fields.hasErrors('*{amount}')} ? 'has-error'">
+                            <label for="input-amount" class="col-sm-2 control-label">Amount:</label>
+                            <div class="col-sm-4">
+                                <div class="input-group">
+                                    <span class="input-group-addon">&euro;</span>
+                                    <input id="input-amount" class="form-control" type="text" placeholder="0,00"
+                                           style="text-align:right;" th:field="*{amount}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"></label>
+                            <div class="col-sm-10">
+                                <div class="btn-toolbar">
+                                    <button id="button-submit-transfer-form" class="btn btn-primary pull-right"
+                                            type="submit">Submit
+                                    </button>
+                                    <a th:href="@{/}" class="btn btn-default pull-right" type="submit">Cancel</a>
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

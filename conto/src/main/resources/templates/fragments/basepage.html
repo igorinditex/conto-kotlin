@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns="http://www.w3.org/1999/xhtml"
+      th:fragment="html(content)" lang="en">
+
+<head th:replace="fragments/head"/>
+
+<body>
+<nav th:replace="fragments/navigation"/>
+<div class="container">
+    <div th:replace="${content}"/>
+</div>
+
+<script src="/public/vendor/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+<script src="/public/vendor/datatables-1.10.13/datatables.min.js"></script>
+</body>
+</html>

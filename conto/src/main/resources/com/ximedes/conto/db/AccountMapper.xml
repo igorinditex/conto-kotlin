@@ -9,6 +9,7 @@
             <arg column="owner" javaType="string"/>
             <arg column="description" javaType="string"/>
             <arg column="minimum_balance" javaType="_long"/>
+            <arg column="balance" javaType="java.lang.Long"/>
         </constructor>
     </resultMap>
 
@@ -30,16 +31,17 @@
 
     <insert id="insertAccount" useGeneratedKeys="true" keyProperty="accountID">
         INSERT INTO account
-        (account_id, owner, description, minimum_balance)
+        (account_id, owner, description, minimum_balance, balance)
         VALUES
-        (#{accountID}, #{owner}, #{description}, #{minimumBalance})
+        (#{accountID}, #{owner}, #{description}, #{minimumBalance}, #{balance})
     </insert>
 
     <update id="updateAccount">
         UPDATE account
         SET description = #{description},
         owner = #{owner},
-        minimum_balance = #{minimumBalance}
+        minimum_balance = #{minimumBalance},
+        balance = #{balance}
         WHERE account_id = #{accountID}
     </update>
 

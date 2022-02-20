@@ -88,6 +88,16 @@ class TransferService(
             throw InsufficientFundsException("Insufficient funds for transferring $amount from account ${debitAccount.accountID} with balance $debitAccount.balance")
         }
 
+        // Update the balance of the debit account.
+        accountService.updateAccountBalanceWhenTransfer(
+            debitAccount.accountID, -amount
+        )
+
+        // Update the balance of the credit account.
+        accountService.updateAccountBalanceWhenTransfer(
+            creditAccount.accountID, amount
+        )
+
         return Transfer(debitAccount.accountID, creditAccount.accountID, amount, description).also {
             transferMapper.insertTransfer(it)
         }

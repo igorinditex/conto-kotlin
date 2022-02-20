@@ -29,6 +29,7 @@ class AccountBuilder {
     var owner = "owner-$ACCOUNT_ID"
     var description = "description-$ACCOUNT_ID"
     var minimumBalance = 0L
+    var balance: Long? = null
 
     private fun build() = Account(accountID, owner, description, minimumBalance)
 

@@ -54,7 +54,8 @@ class AccountService(private val accountMapper: AccountMapper,
 
     private fun doCreateAccount(owner: String, description: String, minimumBalance: Long): Account {
         val accountID = generateAccountID()
-        val account = Account(accountID, owner, description, minimumBalance)
+        // By default create a Account with the balance field set to null.
+        val account = Account(accountID, owner, description, minimumBalance, null)
         accountMapper.insertAccount(account)
         logger.info("Created new account $account.")
         return account

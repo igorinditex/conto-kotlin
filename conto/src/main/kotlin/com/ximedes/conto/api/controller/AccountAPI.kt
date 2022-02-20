@@ -40,6 +40,6 @@ class AccountDTO(
     val accountID: String,
     val owner: String,
     val description: String,
-    val balance: Long? = null,
-    val minimumBalanceAllowed: Long? = null
+    val minimumBalanceAllowed: Long? = null,
+    val balance: Long? = null
 )

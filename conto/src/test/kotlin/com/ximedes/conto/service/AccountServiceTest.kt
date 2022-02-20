@@ -34,6 +34,7 @@ class AccountServiceTest {
         assertEquals(desc, account.description)
         assertEquals(user.getUsername(), account.owner)
         assertEquals(0, account.minimumBalance)
+        assertNull(account.balance)
         verify(accountMapper).insertAccount(account)
     }
 
@@ -53,6 +54,7 @@ class AccountServiceTest {
         assertEquals(desc, account.description)
         assertEquals(owner.getUsername(), account.owner)
         assertEquals(-10000, account.minimumBalance)
+        assertNull(account.balance)
         verify(accountMapper).insertAccount(account)
     }
 
@@ -85,6 +87,7 @@ class AccountServiceTest {
         assertNotNull(bankAccount)
         assertEquals("iamadmin", bankAccount.owner)
         assertEquals(Long.MIN_VALUE, bankAccount.minimumBalance)
+        assertEquals(null, bankAccount.balance)
     }
 
     @Test

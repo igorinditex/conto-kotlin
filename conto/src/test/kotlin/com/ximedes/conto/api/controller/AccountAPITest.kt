@@ -74,6 +74,24 @@ class AccountAPITest {
         assertEquals(-999L, accounts[1].minimumBalanceAllowed)
         assertNull(accounts[2].balance)
         assertNull(accounts[2].minimumBalanceAllowed)
+    }
 
+    @Test
+    fun `user account contains balance`() {
+        val user = UserBuilder.build()
+
+        val account = AccountBuilder.build {
+            owner = user.username
+            minimumBalance = -999L
+            balance = 22L
+        }
+
+        whenever(userService.loggedInUser).thenReturn(user)
+        whenever(accountService.findAllAccounts()).thenReturn(listOf(account))
+
+        val response = api.findAccounts()
+        val accounts = response.body!!
+
+        assertEquals(22L, accounts[0].balance)
     }
 }

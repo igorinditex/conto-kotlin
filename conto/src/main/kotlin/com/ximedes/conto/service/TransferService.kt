@@ -60,7 +60,7 @@ class TransferService(
             } else when (accountID) {
                 t.creditAccountID -> t.amount
                 t.debitAccountID -> -t.amount
-                else -> throw IllegalStateException("Transfer $t should be be in list of transfer for account $accountID")
+                else -> throw IllegalStateException("Transfer $t should be in list of transfer for account $accountID")
             }
         }
     }

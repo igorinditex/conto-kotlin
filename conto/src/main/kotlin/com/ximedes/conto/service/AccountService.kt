@@ -39,6 +39,10 @@ class AccountService(private val accountMapper: AccountMapper,
 
     fun findAllAccounts(): List<Account> = accountMapper.find(AccountCriteria())
 
+    fun setAccountBalance(accountId: String, balance: Long) = accountMapper.setAccountBalance(accountId, balance)
+
+    fun updateAccountBalanceWhenTransfer(accountId: String, amount: Long) = accountMapper.updateAccountBalanceWhenTransfer(accountId, amount)
+
     @PreAuthorize("hasRole('ROLE_USER')")
     fun createAccount(description: String): Account {
         val username = userService.loggedInUser!!.username
@@ -54,7 +58,8 @@ class AccountService(private val accountMapper: AccountMapper,
 
     private fun doCreateAccount(owner: String, description: String, minimumBalance: Long): Account {
         val accountID = generateAccountID()
-        val account = Account(accountID, owner, description, minimumBalance)
+        // By default create a Account with the balance field set to null.
+        val account = Account(accountID, owner, description, minimumBalance, null)
         accountMapper.insertAccount(account)
         logger.info("Created new account $account.")
         return account

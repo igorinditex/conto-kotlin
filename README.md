@@ -1,6 +1,22 @@
-# Introduction
+# What is Conto?
 
 Conto is a toy banking application, where users can sign up, create accounts, and transfer money to other accounts. Detailed requirements can be found in the file `requirements.md` in this folder.
+
+# Introduction
+The balance of an account in Conto is the sum of all transfers to that account (credit), minus the sum of all transfers from that account (debit).
+
+In the current implementation of Conto, to find the balance of an account you call the findTransfer method in the TransferService. This method implements the balance calculation by first querying the database for all transfers to or from the account, resulting in a List of zero or more Transfer objects. Then, the balance is calculated by summing over the amounts in this list, adding to the balance when it is a credit transfer, and deducting it when it is a debit transfer.
+
+While functionally correct, this implementation leaves a lot to be desired. Over time, as more and more transfers to and from an account occur, the list of transfers to select from the database increases. This leads to more load and slower performance of the database query, and requires more and more memory to keep the list in memory.
+
+Furthermore, the calculation itself will take more and more time, as we have to loop over ever more objects to calculate the balance.
+
+# Assignment
+
+Your task is to increase the performance of balance calculation by storing the current balance of accounts in the database, and keeping this balance always up-to-date by updating it whenever a transfer to or from that account occurs.
+
+Make sure to update the set of unit tests to reflect the new design
+The integration tests should succeed without any changes to their implementation
 
 # Code overview
 

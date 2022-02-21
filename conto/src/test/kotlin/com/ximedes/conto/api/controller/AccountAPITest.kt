@@ -8,7 +8,6 @@ import com.ximedes.conto.service.AccountService
 import com.ximedes.conto.service.TransferService
 import com.ximedes.conto.service.UserService
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class AccountAPITest {
@@ -37,7 +36,7 @@ class AccountAPITest {
 
         whenever(userService.loggedInUser).thenReturn(user)
         whenever(accountService.findAllAccounts()).thenReturn(listOf(account))
-        whenever(transferService.findBalance(account.accountID)).thenReturn(543L)
+        whenever(transferService.calculateBalanceThroughTransfersHistory(account.accountID)).thenReturn(543L)
 
         val response = api.findAccounts()
 
@@ -63,7 +62,7 @@ class AccountAPITest {
 
         whenever(userService.loggedInUser).thenReturn(user)
         whenever(accountService.findAllAccounts()).thenReturn(listOf(a, b, c))
-        whenever(transferService.findBalance(b.accountID)).thenReturn(1234L)
+        whenever(transferService.calculateBalanceThroughTransfersHistory(b.accountID)).thenReturn(1234L)
 
         val response = api.findAccounts()
         val accounts = response.body!!
@@ -75,6 +74,24 @@ class AccountAPITest {
         assertEquals(-999L, accounts[1].minimumBalanceAllowed)
         assertNull(accounts[2].balance)
         assertNull(accounts[2].minimumBalanceAllowed)
+    }
 
+    @Test
+    fun `user account contains balance`() {
+        val user = UserBuilder.build()
+
+        val account = AccountBuilder.build {
+            owner = user.username
+            minimumBalance = -999L
+            balance = 22L
+        }
+
+        whenever(userService.loggedInUser).thenReturn(user)
+        whenever(accountService.findAllAccounts()).thenReturn(listOf(account))
+
+        val response = api.findAccounts()
+        val accounts = response.body!!
+
+        assertEquals(22L, accounts[0].balance)
     }
 }

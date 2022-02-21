@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.lang.IllegalStateException
 import javax.security.auth.login.AccountNotFoundException
 
-const val SIGNUP_BONUS = 100L;
+const val SIGNUP_BONUS = 100L
 
 @Service
 @Transactional
@@ -32,7 +32,27 @@ class TransferService(
             "User ${userService.loggedInUser} does not have access to account $accountID"
         }
 
+        val accountBalance: Long
+        // Check if the account balance is present in the DB
+        if (account.balance != null) {
+            accountBalance = account.balance
+        } else {
+            // If the balance is not present in the DB, the value has to be calculated.
+            accountBalance = calculateBalanceThroughTransfersHistory(accountID)
+            // Set the balance in the DB
+            accountService.setAccountBalance(
+                account.accountID,
+                accountBalance
+            )
+        }
+        return accountBalance
+    }
+
+    fun calculateBalanceThroughTransfersHistory(
+        accountID: String
+    ): Long {
         val transfers = transferMapper.findTransfersByAccountID(accountID)
+
         return transfers.sumByLong { t ->
             if (t.creditAccountID == t.debitAccountID) {
                 // Corner case
@@ -40,7 +60,7 @@ class TransferService(
             } else when (accountID) {
                 t.creditAccountID -> t.amount
                 t.debitAccountID -> -t.amount
-                else -> throw IllegalStateException("Transfer $t should be be in list of transfer for account $accountID")
+                else -> throw IllegalStateException("Transfer $t should be in list of transfer for account $accountID")
             }
         }
     }
@@ -63,10 +83,21 @@ class TransferService(
             "User ${userService.loggedInUser} does not have access to account $debitAccountID"
         }
 
-        val currentBalance = findBalance(debitAccount.accountID)
-        if (currentBalance - amount < debitAccount.minimumBalance) {
-            throw InsufficientFundsException("Insufficient funds for transferring $amount from account ${debitAccount.accountID} with balance $currentBalance")
+        val debitAccountBalance: Long = debitAccount.balance ?: findBalance(debitAccount.accountID)
+
+        if (debitAccountBalance - amount < debitAccount.minimumBalance) {
+            throw InsufficientFundsException("Insufficient funds for transferring $amount from account ${debitAccount.accountID} with balance $debitAccountBalance")
         }
+
+        // Update the balance of the debit account.
+        accountService.updateAccountBalanceWhenTransfer(
+            debitAccount.accountID, -amount
+        )
+
+        // Update the balance of the credit account.
+        accountService.updateAccountBalanceWhenTransfer(
+            creditAccount.accountID, amount
+        )
 
         return Transfer(debitAccount.accountID, creditAccount.accountID, amount, description).also {
             transferMapper.insertTransfer(it)

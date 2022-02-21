@@ -13,6 +13,8 @@ import com.ximedes.conto.domain.AccountNotAvailableException.Type.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mockito.Mockito.never
+import java.lang.IllegalStateException
 
 class TransferServiceTest {
 
@@ -114,7 +116,6 @@ class TransferServiceTest {
         assertEquals(10, t.amount)
         assertEquals("desc", t.description)
     }
-
 
 
     @Test
@@ -234,6 +235,36 @@ class TransferServiceTest {
         })
         assertThrows<IllegalArgumentException> {
             transferService.findBalance("foo")
+        }
+    }
+
+    @Test
+    fun `findByAccountID finds account with balance by account ID and avoid calculate balance`() {
+        val user = UserBuilder.build()
+
+        whenever(userService.loggedInUser).thenReturn(user)
+
+        val account = AccountBuilder.build {
+            owner = user.username
+            accountID = "NLBRAT00075566"
+            balance = 150L
+        }
+
+        whenever(accountService.findByAccountID(account.accountID)).thenReturn(account)
+        assertEquals(150L, transferService.findBalance(account.accountID))
+        verify(transferMapper, never()).findTransfersByAccountID(account.accountID)
+    }
+
+    @Test
+    fun `it throws an exception when transfer is not in list of transfer for account`() {
+
+        val accountID = "NLBRAT00075566"
+
+        whenever(transferMapper.findTransfersByAccountID(accountID)).thenReturn(listOf(TransferBuilder.build {
+        }))
+
+        assertThrows<IllegalStateException> {
+            transferService.calculateBalanceThroughTransfersHistory(accountID)
         }
     }
 

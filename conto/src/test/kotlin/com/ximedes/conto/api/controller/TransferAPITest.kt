@@ -5,18 +5,21 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import com.ximedes.conto.TransferBuilder
 import com.ximedes.conto.TransferRequestBuilder
+import com.ximedes.conto.domain.AccountNotAvailableException
+import com.ximedes.conto.domain.AccountNotAvailableException.Type.DEBIT
+import com.ximedes.conto.domain.InsufficientFundsException
 import com.ximedes.conto.service.TransferService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
+import org.springframework.http.HttpStatus
 import org.springframework.validation.BindingResult
 
 
 class TransferAPITest {
-    val transferService = mock<TransferService>()
-    val bindingResult = mock<BindingResult>()
+    private val transferService = mock<TransferService>()
+    private val bindingResult = mock<BindingResult>()
     val api = TransferAPI(transferService)
 
     @Test
@@ -67,5 +70,52 @@ class TransferAPITest {
         )
     }
 
+    @Test
+    fun `it throws an exception when insufficient funds for transferring`() {
+
+        val transferRequest = TransferRequestBuilder.build()
+
+        whenever(
+            transferService.attemptTransfer(
+                transferRequest.debitAccountID,
+                transferRequest.creditAccountID,
+                transferRequest.amount,
+                transferRequest.description
+            )
+        ).then {
+            throw InsufficientFundsException(("Insufficient funds for transferring ${transferRequest.amount} from account ${transferRequest.debitAccountID} with balance 0"))
+        }
+
+        val response = api.createTransfer(transferRequest, bindingResult)
+        assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)
+        assertEquals("Insufficient funds", response.body?.errors?.get(0))
+    }
+
+    @Test
+    fun `it throws an exception when account not available`() {
+
+        val transferRequest = TransferRequestBuilder.build()
+
+        whenever(
+            transferService.attemptTransfer(
+                transferRequest.debitAccountID,
+                transferRequest.creditAccountID,
+                transferRequest.amount,
+                transferRequest.description
+            )
+        ).then {
+            throw AccountNotAvailableException(
+                DEBIT,
+                "Debit account with ID $transferRequest.debitAccountID not found."
+            )
+        }
+
+        val response = api.createTransfer(transferRequest, bindingResult)
+        assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)
+        assertEquals(
+            "Debit account with ID TransferRequest(debitAccountID=debit, creditAccountID=credit, amount=0, description=description).debitAccountID not found.",
+            response.body?.errors?.get(0)
+        )
+    }
 
 }

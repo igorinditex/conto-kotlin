@@ -113,4 +113,16 @@ class AccountServiceTest {
         assertSame(accountList.first(), accountService.findByAccountID("whatever"))
     }
 
+    @Test
+    fun `setAccountBalance uses accountId and balance in the right way`() {
+        accountService.setAccountBalance("NLBRAT00075566", 140L)
+        verify(accountMapper).setAccountBalance("NLBRAT00075566", 140L)
+    }
+
+    @Test
+    fun `updateAccountBalanceWhenTransfer uses accountId and balance in the right way`() {
+        accountService.updateAccountBalanceWhenTransfer("NLBRAT00075566", 140L)
+        verify(accountMapper).updateAccountBalanceWhenTransfer("NLBRAT00075566", 140L)
+    }
+
 }

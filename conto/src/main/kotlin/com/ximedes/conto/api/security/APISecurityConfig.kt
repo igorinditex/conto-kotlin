@@ -15,6 +15,8 @@ import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
+private const val API_PATH_PARAM = "/api/**"
+
 /**
  * This bean provides the security configuration for the Rest API.
  *
@@ -43,7 +45,7 @@ class APISecurityConfig(
     override fun configure(http: HttpSecurity) {
         http
             // This setup only applies to URLs that start with /api, so not the web frontend
-            .antMatcher("/api/**")
+            .antMatcher(API_PATH_PARAM)
             // Enable cors, automatically using the configuration from corsConfigurationSource
             .cors().and()
             // Use our JWTSecurityContextRepository
@@ -69,13 +71,13 @@ class APISecurityConfig(
                 These requests do not include our authorization header with the JWT,
                 so we need to always allow them explicitly
             */
-            .antMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
+            .antMatchers(HttpMethod.OPTIONS, API_PATH_PARAM).permitAll()
             // Obviously, the login url needs to be reachable by non-logged in users
             .antMatchers("/api/login").permitAll()
             // And the CSP report violations
             .antMatchers("/api/csp-report").permitAll()
             // Secure everything else
-            .antMatchers("/api/**").authenticated()
+            .antMatchers(API_PATH_PARAM).authenticated()
 
 
         /*
@@ -115,7 +117,7 @@ class APISecurityConfig(
         }
 
         return UrlBasedCorsConfigurationSource().apply {
-            registerCorsConfiguration("/api/**", config)
+            registerCorsConfiguration(API_PATH_PARAM, config)
         }
 
     }

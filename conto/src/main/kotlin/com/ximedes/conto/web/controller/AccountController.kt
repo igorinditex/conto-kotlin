@@ -3,7 +3,6 @@ package com.ximedes.conto.web.controller
 import com.ximedes.conto.domain.isAdmin
 import com.ximedes.conto.service.AccountService
 import com.ximedes.conto.service.UserService
-import mu.KotlinLogging
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model

@@ -1,7 +1,11 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
       xmlns="http://www.w3.org/1999/xhtml"
       th:replace="fragments/basepage :: html(~{::content})">
+
+<head>
+    <title>Signup Page</title>
+</head>
 
 <div th:fragment="content" id="div-page-signup">
     <div class="row">
@@ -16,6 +20,7 @@
                         <div id="form-signup-errors" th:errors="*" class="alert alert-danger"/>
 
                         <fieldset>
+                            <legend>Signup data</legend>∫
                             <div class="form-group" th:classappend="${#fields.hasErrors('*{username}')} ? 'has-error'">
                                 <input id="input-username" class="form-control" placeholder="Username" name="username"
                                        type="text"

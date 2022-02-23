@@ -30,9 +30,49 @@
         SELECT *
         FROM transfer t
         WHERE t.debit_account_id = #{id}
-              OR
-              t.credit_account_id = #{id}
+        OR
+        t.credit_account_id = #{id}
     </select>
 
+    <select id="calculateBalanceByAccountID" resultType="Long">
+        WITH DebitAccount AS
+        (
+           SELECT
+              ISNULL( (
+              SELECT
+                 SUM(AMOUNT) as DA_AMOUNT
+              FROM
+                 TRANSFER
+              WHERE
+                 DEBIT_ACCOUNT_ID = #{id}
+              GROUP BY
+                 DEBIT_ACCOUNT_ID), 0) AS DA_AMOUNT
+        ),
+        CreditAccount AS
+        (
+           SELECT
+              ISNULL( (
+              SELECT
+                 SUM(AMOUNT) as CA_AMOUNT
+              FROM
+                 TRANSFER
+              WHERE
+                 CREDIT_ACCOUNT_ID = #{id}
+              GROUP BY
+                 CREDIT_ACCOUNT_ID), 0) AS CA_AMOUNT
+        ),
+        AccountBalance AS
+        (
+           SELECT
+            ca.CA_AMOUNT - da.DA_AMOUNT AS AMOUNT
+           FROM
+              DebitAccount da,
+              CreditAccount ca
+        )
+        SELECT
+           *
+        FROM
+           AccountBalance;
+    </select>
 
 </mapper>

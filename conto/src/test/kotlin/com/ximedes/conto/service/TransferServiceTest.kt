@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito.never
-import java.lang.IllegalStateException
 
 class TransferServiceTest {
 
@@ -26,7 +25,30 @@ class TransferServiceTest {
     val transferCaptor = argumentCaptor<Transfer>()
 
     @Test
-    fun `transfer from a user's own account with sufficient balance succeed, fail with insufficient balance`() {
+    fun `transfer from a user's own account with sufficient balance succeed`() {
+        val user = UserBuilder.build()
+        whenever(userService.loggedInUser).thenReturn(user)
+        whenever(userService.findByUsername(user.username)).thenReturn(user)
+
+        val debitAccount = AccountBuilder.build {
+            owner = user.username
+            balance = 200L
+        }
+        val creditAccount = AccountBuilder.build()
+        whenever(accountService.findByAccountID(debitAccount.accountID)).thenReturn(debitAccount)
+        whenever(accountService.findByAccountID(creditAccount.accountID)).thenReturn(creditAccount)
+
+        val t = transferService.attemptTransfer(debitAccount.accountID, creditAccount.accountID, 100, "desc")
+        verify(transferMapper).insertTransfer(t)
+
+        assertEquals(debitAccount.accountID, t.debitAccountID)
+        assertEquals(creditAccount.accountID, t.creditAccountID)
+        assertEquals(100, t.amount)
+        assertEquals("desc", t.description)
+    }
+
+    @Test
+    fun `transfer from a user's own account fail with insufficient balance`() {
         val user = UserBuilder.build()
         whenever(userService.loggedInUser).thenReturn(user)
         whenever(userService.findByUsername(user.username)).thenReturn(user)
@@ -37,26 +59,6 @@ class TransferServiceTest {
         val creditAccount = AccountBuilder.build()
         whenever(accountService.findByAccountID(debitAccount.accountID)).thenReturn(debitAccount)
         whenever(accountService.findByAccountID(creditAccount.accountID)).thenReturn(creditAccount)
-
-        // Balance is 150, so should succeed
-        whenever(transferMapper.findTransfersByAccountID(debitAccount.accountID)).thenReturn(listOf(TransferBuilder.build {
-            creditAccountID = debitAccount.accountID
-            amount = 150
-        }))
-
-        val t = transferService.attemptTransfer(debitAccount.accountID, creditAccount.accountID, 100, "desc")
-        verify(transferMapper).insertTransfer(t)
-
-        assertEquals(debitAccount.accountID, t.debitAccountID)
-        assertEquals(creditAccount.accountID, t.creditAccountID)
-        assertEquals(100, t.amount)
-        assertEquals("desc", t.description)
-
-        // Balance is 50, so should fail
-        whenever(transferMapper.findTransfersByAccountID(debitAccount.accountID)).thenReturn(listOf(TransferBuilder.build {
-            creditAccountID = debitAccountID
-            amount = 50
-        }))
 
         assertThrows<InsufficientFundsException> {
             transferService.attemptTransfer(debitAccount.accountID, creditAccount.accountID, 100, "desc")
@@ -93,6 +95,7 @@ class TransferServiceTest {
 
         val debitAccount = AccountBuilder.build {
             owner = "not_admin"
+            balance = 200L
         }
 
         val creditAccount = AccountBuilder.build()
@@ -158,41 +161,6 @@ class TransferServiceTest {
     }
 
     @Test
-    fun `it knows how to calculate balance from credit and debit transactions`() {
-        val user = UserBuilder.build()
-        whenever(userService.loggedInUser).thenReturn(user)
-
-        val (accountA, accountB, accountC) = AccountBuilder.build(3) {
-            owner = user.username
-        }
-        whenever(accountService.findByAccountID(accountA.accountID)).thenReturn(accountA)
-        whenever(accountService.findByAccountID(accountB.accountID)).thenReturn(accountB)
-        whenever(accountService.findByAccountID(accountC.accountID)).thenReturn(accountC)
-
-        val txAtoB = (1..100).map {
-            TransferBuilder.build {
-                debitAccountID = accountA.accountID
-                creditAccountID = accountB.accountID
-                amount = 3
-            }
-        }
-        val txBtoC = (1..75).map {
-            TransferBuilder.build {
-                debitAccountID = accountB.accountID
-                creditAccountID = accountC.accountID
-                amount = 1
-            }
-        }
-        whenever(transferMapper.findTransfersByAccountID(accountA.accountID)).thenReturn(txAtoB)
-        whenever(transferMapper.findTransfersByAccountID(accountB.accountID)).thenReturn(txAtoB + txBtoC)
-        whenever(transferMapper.findTransfersByAccountID(accountC.accountID)).thenReturn(txBtoC)
-
-        assertEquals(-300, transferService.findBalance(accountA.accountID))
-        assertEquals(225, transferService.findBalance(accountB.accountID))
-        assertEquals(75, transferService.findBalance(accountC.accountID))
-    }
-
-    @Test
     fun `on receiving a FirstAccountCreatedEvent the account is credited with the signup bonus from the root account`() {
         whenever(accountService.rootAccount).thenReturn(AccountBuilder.build { accountID = "root" })
         transferService.onFirstAccountCreated(FirstAccountCreatedEvent(this, "owner", "account"))
@@ -253,19 +221,6 @@ class TransferServiceTest {
         whenever(accountService.findByAccountID(account.accountID)).thenReturn(account)
         assertEquals(150L, transferService.findBalance(account.accountID))
         verify(transferMapper, never()).findTransfersByAccountID(account.accountID)
-    }
-
-    @Test
-    fun `it throws an exception when transfer is not in list of transfer for account`() {
-
-        val accountID = "NLBRAT00075566"
-
-        whenever(transferMapper.findTransfersByAccountID(accountID)).thenReturn(listOf(TransferBuilder.build {
-        }))
-
-        assertThrows<IllegalStateException> {
-            transferService.calculateBalanceThroughTransfersHistory(accountID)
-        }
     }
 
 }

@@ -30,7 +30,7 @@ class AccountAPI(
                     accountBalance = a.balance
                 } else {
                     // As the balance is not present, this value must be calculated.
-                    accountBalance = transferService.calculateBalanceThroughTransfersHistory(a.accountID)
+                    accountBalance = transferService.calculateBalanceByAccountID(a.accountID)
                 }
                 AccountDTO(a.accountID, a.owner, a.description, a.minimumBalance, accountBalance)
             } else {

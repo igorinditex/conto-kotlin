@@ -19,8 +19,6 @@ import javax.validation.constraints.Pattern
 @RequestMapping("/api/transfer")
 class TransferAPI(private val transferService: TransferService) {
 
-    private val logger = KotlinLogging.logger { }
-
     @GetMapping(value = ["/{accountID}"])
     fun getTransfersByAccountID(@PathVariable accountID: String): ResponseEntity<List<TransferDTO>> {
         val transfers: List<Transfer> = transferService.findTransfersByAccountID(accountID)

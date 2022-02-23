@@ -1,8 +1,12 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
       xmlns="http://www.w3.org/1999/xhtml"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       th:replace="fragments/basepage :: html(~{::content})">
+
+<head>
+    <title>Account Page</title>
+</head>
 
 <div th:fragment="content" id="div-create-account-page">
     <div class="row">

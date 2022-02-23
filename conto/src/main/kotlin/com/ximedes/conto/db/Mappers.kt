@@ -40,4 +40,5 @@ interface TransferMapper {
     fun insertTransfer(t: Transfer)
     fun findByTransferID(transferID: Long): Transfer?
     fun findTransfersByAccountID(accountID: String): List<Transfer>
+    fun calculateBalanceByAccountID(accountID: String): Long
 }

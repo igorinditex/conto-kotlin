@@ -76,6 +76,10 @@ class TransferService(
             throw InsufficientFundsException("Insufficient funds for transferring $amount from account ${debitAccount.accountID} with balance $debitAccountBalance")
         }
 
+        val transfer = Transfer(debitAccount.accountID, creditAccount.accountID, amount, description).also {
+            transferMapper.insertTransfer(it)
+        }
+
         // Update the balance of the debit account.
         accountService.updateAccountBalanceWhenTransfer(
             debitAccount.accountID, -amount
@@ -86,10 +90,7 @@ class TransferService(
             creditAccount.accountID, amount
         )
 
-        return Transfer(debitAccount.accountID, creditAccount.accountID, amount, description).also {
-            transferMapper.insertTransfer(it)
-        }
-
+        return transfer
     }
 
     @PreAuthorize("isAuthenticated()")

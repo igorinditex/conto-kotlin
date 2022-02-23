@@ -3,13 +3,11 @@ package com.ximedes.conto.service
 import com.ximedes.conto.db.TransferMapper
 import com.ximedes.conto.domain.*
 import com.ximedes.conto.domain.AccountNotAvailableException.Type.*
-import com.ximedes.conto.sumByLong
 import mu.KotlinLogging
 import org.springframework.context.event.EventListener
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.lang.IllegalStateException
 import javax.security.auth.login.AccountNotFoundException
 
 const val SIGNUP_BONUS = 100L
@@ -38,7 +36,7 @@ class TransferService(
             accountBalance = account.balance
         } else {
             // If the balance is not present in the DB, the value has to be calculated.
-            accountBalance = calculateBalanceThroughTransfersHistory(accountID)
+            accountBalance = calculateBalanceByAccountID(accountID)
             // Set the balance in the DB
             accountService.setAccountBalance(
                 account.accountID,
@@ -48,21 +46,10 @@ class TransferService(
         return accountBalance
     }
 
-    fun calculateBalanceThroughTransfersHistory(
+    fun calculateBalanceByAccountID(
         accountID: String
     ): Long {
-        val transfers = transferMapper.findTransfersByAccountID(accountID)
-
-        return transfers.sumByLong { t ->
-            if (t.creditAccountID == t.debitAccountID) {
-                // Corner case
-                0L
-            } else when (accountID) {
-                t.creditAccountID -> t.amount
-                t.debitAccountID -> -t.amount
-                else -> throw IllegalStateException("Transfer $t should be in list of transfer for account $accountID")
-            }
-        }
+        return transferMapper.calculateBalanceByAccountID(accountID)
     }
 
     // TODO this can go now, right? because these are runtimes?
@@ -121,6 +108,10 @@ class TransferService(
         logger.info { "Granting signup bonus to owner ${event.owner} of new first account ${event.accountID}" }
         val t = Transfer(accountService.rootAccount.accountID, event.accountID, SIGNUP_BONUS, "Welcome to Conto!")
         transferMapper.insertTransfer(t)
+        // Update the balance of the bank account.
+        accountService.updateAccountBalanceWhenTransfer(
+            t.debitAccountID, -t.amount
+        )
     }
 
 }

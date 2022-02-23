@@ -36,7 +36,7 @@ class AccountAPITest {
 
         whenever(userService.loggedInUser).thenReturn(user)
         whenever(accountService.findAllAccounts()).thenReturn(listOf(account))
-        whenever(transferService.calculateBalanceThroughTransfersHistory(account.accountID)).thenReturn(543L)
+        whenever(transferService.calculateBalanceByAccountID(account.accountID)).thenReturn(543L)
 
         val response = api.findAccounts()
 
@@ -62,7 +62,7 @@ class AccountAPITest {
 
         whenever(userService.loggedInUser).thenReturn(user)
         whenever(accountService.findAllAccounts()).thenReturn(listOf(a, b, c))
-        whenever(transferService.calculateBalanceThroughTransfersHistory(b.accountID)).thenReturn(1234L)
+        whenever(transferService.calculateBalanceByAccountID(b.accountID)).thenReturn(1234L)
 
         val response = api.findAccounts()
         val accounts = response.body!!
